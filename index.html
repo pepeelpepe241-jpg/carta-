@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Sofía Cristina, De Parte de Abner ❤️</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #fff0f3 0%, #fff5f7 40%, #fff9e6 100%);
+            overflow-x: hidden;
+        }
+
+        .font-cursive { font-family: 'Dancing Script', cursive; }
+        .font-romantic { font-family: 'Great Vibes', cursive; }
+
+        /* Partículas de Fondo */
+        #particles-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Sobre 3D Interactivo */
+        .envelope-wrapper { perspective: 1000px; }
+        .envelope {
+            position: relative;
+            width: 310px; height: 210px;
+            background-color: #f43f5e;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            box-shadow: 0 20px 35px rgba(244, 63, 94, 0.25);
+            cursor: pointer;
+            transition: transform 0.6s ease, box-shadow 0.6s ease;
+        }
+        @media (min-width: 640px) {
+            .envelope { width: 440px; height: 280px; }
+        }
+        .envelope:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 40px rgba(244, 63, 94, 0.35);
+        }
+        .envelope .flap {
+            position: absolute; top: 0; left: 0; width: 0; height: 0;
+            border-left: 155px solid transparent; border-right: 155px solid transparent;
+            border-top: 125px solid #e11d48;
+            transform-origin: top;
+            transition: transform 0.6s 0.4s ease, z-index 0.2s 0.4s ease;
+            z-index: 5;
+        }
+        @media (min-width: 640px) {
+            .envelope .flap {
+                border-left: 220px solid transparent; border-right: 220px solid transparent;
+                border-top: 170px solid #e11d48;
+            }
+        }
+        .envelope .pocket {
+            position: absolute; bottom: 0; left: 0; width: 0; height: 0;
+            border-left: 155px solid #fb7185; border-right: 155px solid #fb7185;
+            border-bottom: 110px solid #f43f5e; border-top: 110px solid transparent;
+            border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
+            z-index: 4;
+        }
+        @media (min-width: 640px) {
+            .envelope .pocket {
+                border-left: 220px solid #fb7185; border-right: 220px solid #fb7185;
+                border-bottom: 140px solid #f43f5e; border-top: 140px solid transparent;
+            }
+        }
+        .envelope .letter-preview {
+            position: absolute; bottom: 12px; left: 50%;
+            transform: translateX(-50%);
+            width: 88%; height: 85%;
+            background: #fffdfa; border-radius: 10px; padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.6s 0.2s ease, opacity 0.6s ease;
+            z-index: 3; text-align: center; border: 2px dashed #fecdd3;
+        }
+        .envelope.open .flap {
+            transform: rotateX(180deg); z-index: 1;
+            transition: transform 0.6s ease, z-index 0.2s 0.4s ease;
+        }
+        .envelope.open .letter-preview {
+            transform: translate(-50%, -110px); z-index: 6;
+            transition: transform 0.8s 0.4s ease;
+        }
+        .wax-seal {
+            position: absolute; top: 100px; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 54px; height: 54px;
+            background: radial-gradient(circle, #fbbf24 0%, #d97706 100%);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.25); z-index: 6;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            border: 2px solid #fef3c7;
+        }
+        @media (min-width: 640px) {
+            .wax-seal { top: 130px; width: 64px; height: 64px; }
+        }
+        .envelope.open .wax-seal {
+            opacity: 0; transform: translate(-50%, -50%) scale(0.5);
+            pointer-events: none;
+        }
+
+        /* Tarjeta Giratoria (Flip Cards) */
+        .flip-card { background-color: transparent; perspective: 1000px; }
+        .flip-card-inner {
+            position: relative; width: 100%; height: 100%; text-align: center;
+            transition: transform 0.8s; transform-style: preserve-3d;
+        }
+        .flip-card:hover .flip-card-inner, .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 1.25rem; box-shadow: 0 10px 25px rgba(244, 63, 94, 0.08);
+        }
+        .flip-card-back { transform: rotateY(180deg); }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+        }
+        .floating { animation: floatSlow 4s ease-in-out infinite; }
+
+        /* Estilo para el juego de atrapado */
+        .game-item {
+            position: absolute;
+            user-select: none;
+            cursor: pointer;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            0% { top: -40px; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800 flex flex-col justify-between relative selection:bg-rose-200 selection:text-rose-900">
+
+    <canvas id="particles-canvas"></canvas>
+
+    <!-- Header / Barra de Navegación -->
+    <header class="w-full py-4 px-6 sticky top-0 z-40 bg-white/70 backdrop-blur-md border-b border-rose-100 flex justify-between items-center shadow-sm">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl">🌷</span>
+            <div>
+                <p class="font-romantic text-2xl md:text-3xl text-rose-600 font-bold leading-none">Sofía Cristina & Abner</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="#game-section" class="hidden sm:flex bg-amber-100 text-amber-800 hover:bg-amber-200 px-3 py-1.5 rounded-full text-xs font-semibold transition items-center gap-1">
+                <i class="fa-solid fa-gamepad"></i> Minijuego
+            </a>
+            <a href="#music-section" class="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-2 rounded-full shadow hover:shadow-md transition flex items-center gap-2 text-xs md:text-sm font-medium">
+                <i class="fa-solid fa-music"></i>
+                <span>"Favorito" - Camilo</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[85vh] z-20">
+
+        <!-- Banner Principal de Dedicatoria -->
+        <div class="text-center mb-6 max-w-3xl relative">
+            <div class="inline-flex items-center gap-2 bg-gradient-to-r from-rose-100 via-amber-100 to-pink-100 text-rose-800 text-xs font-bold px-4 py-1.5 rounded-full mb-3 shadow-sm border border-rose-200">
+                <i class="fa-solid fa-heart text-rose-500 animate-pulse"></i>
+                <span>De parte de Abner para el amor de su vida</span>
+                <i class="fa-solid fa-heart text-rose-500 animate-pulse"></i>
+            </div>
+            <h1 class="font-romantic text-5xl md:text-7xl lg:text-8xl text-rose-600 mb-2 drop-shadow-sm leading-tight">
+                Sofía Cristina<br>Vázquez Megía
+            </h1>
+            <p class="text-gray-600 text-sm md:text-base font-light max-w-xl mx-auto mt-2">
+                Un rincón interactivo lleno de tulipanes, a Snoopy y todo el amor que **Abner** siente por ti. 🌷✨
+            </p>
+        </div>
+
+        <!-- Tarjeta de Snoopy y Casita Roja -->
+        <div class="my-6 flex flex-wrap justify-center items-center gap-6">
+            
+            <!-- Snoopy Durmiendo sobre su Casita con Tulipán -->
+            <div class="bg-white/80 p-4 rounded-3xl shadow-xl border border-rose-100 flex flex-col items-center text-center floating max-w-xs">
+                <svg class="w-44 h-40" viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Casita de Snoopy Roja -->
+                    <path d="M40 160 L160 160 L160 100 L100 60 L40 100 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="3"/>
+                    <!-- Techo sombra -->
+                    <path d="M35 102 L100 58 L165 102" stroke="#991b1b" stroke-width="5" stroke-linecap="round"/>
+                    <!-- Puerta de la casita -->
+                    <path d="M85 160 A15 25 0 0 1 115 160 Z" fill="#7f1d1d"/>
+                    
+                    <!-- Snoopy Durmiendo Arriba -->
+                    <!-- Cuerpo -->
+                    <ellipse cx="95" cy="55" rx="28" ry="12" fill="white" stroke="#1e293b" stroke-width="2.5"/>
+                    <!-- Cabeza -->
+                    <circle cx="125" cy="50" r="14" fill="white" stroke="#1e293b" stroke-width="2.5"/>
+                    <!-- Oreja Negra -->
+                    <ellipse cx="120" cy="52" rx="5" ry="9" fill="#1e293b"/>
+                    <!-- Ojo durmiendo -->
+                    <path d="M128 48 Q132 52 135 48" stroke="#1e293b" stroke-width="2" stroke-linecap="round" fill="none"/>
+                    <!-- Patitas -->
+                    <ellipse cx="73" cy="58" rx="6" ry="4" fill="white" stroke="#1e293b" stroke-width="2"/>
+                    <ellipse cx="82" cy="58" rx="6" ry="4" fill="white" stroke="#1e293b" stroke-width="2"/>
+
+                    <!-- Tulipán al lado -->
+                    <path d="M165 150 Q175 120 170 100" stroke="#22c55e" stroke-width="3" fill="none"/>
+                    <path d="M170 100 C160 85, 165 75, 172 70 C176 80, 180 80, 182 70 C188 75, 190 85, 182 100 Z" fill="#fbbf24" stroke="#d97706" stroke-width="2"/>
+                    <!-- Zzz -->
+                    <text x="145" y="35" fill="#f43f5e" font-family="Poppins" font-weight="bold" font-size="14">Z</text>
+                    <text x="157" y="25" fill="#f43f5e" font-family="Poppins" font-weight="bold" font-size="11">z</text>
+                    <text x="166" y="18" fill="#f43f5e" font-family="Poppins" font-weight="bold" font-size="9">z</text>
+                </svg>
+                <p class="font-cursive text-rose-600 text-lg font-bold mt-1">"Abner piensa en ti todo el día"</p>
+                <p class="text-xs text-gray-500">Toca el sobre rojo de abajo para leer la carta</p>
+            </div>
+
+            <!-- Snoopy Abrazando un Corazón -->
+            <div class="bg-white/80 p-4 rounded-3xl shadow-xl border border-rose-100 flex flex-col items-center text-center floating max-w-xs" style="animation-delay: 1.5s;">
+                <svg class="w-44 h-40" viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="100" cy="165" rx="50" ry="8" fill="#fbcfe8" opacity="0.6"/>
+                    <!-- Corazón Gigante -->
+                    <path d="M100 65 C100 40, 60 30, 50 60 C40 90, 100 135, 100 145 C100 135, 160 90, 150 60 C140 30, 100 40, 100 65 Z" fill="#f43f5e" stroke="#e11d48" stroke-width="2"/>
+                    
+                    <!-- Cabeza Snoopy Asomándose -->
+                    <path d="M85 80 C75 55, 115 40, 130 65 C142 75, 138 100, 115 95 C98 95, 90 100, 85 80 Z" fill="white" stroke="#1e293b" stroke-width="2.5"/>
+                    <ellipse cx="85" cy="70" rx="6" ry="10" fill="#1e293b"/>
+                    <ellipse cx="132" cy="70" rx="5" ry="4" fill="#1e293b"/>
+                    <path d="M110 65 Q116 60 122 65" stroke="#1e293b" stroke-width="2" stroke-linecap="round" fill="none"/>
+                    <path d="M115 80 Q122 86 128 78" stroke="#1e293b" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+                    <!-- Brazos de Snoopy Abrazando el corazón -->
+                    <path d="M75 105 Q90 115 100 110" stroke="#1e293b" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path d="M125 105 Q110 115 100 110" stroke="#1e293b" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    
+                    <!-- Tulipán -->
+                    <path d="M40 140 C30 110, 50 90, 55 80" stroke="#22c55e" stroke-width="3" fill="none"/>
+                    <path d="M55 80 C48 70, 52 60, 60 55 C63 63, 67 63, 70 55 C75 60, 78 70, 70 80 Z" fill="#f43f5e"/>
+                </svg>
+                <p class="font-cursive text-amber-600 text-lg font-bold mt-1">"Un amor tan grande como tú"</p>
+                <p class="text-xs text-gray-500">Haz clic para descubrir más sorpresas</p>
+            </div>
+
+        </div>
+
+        <!-- Sobre Interactivo 3D -->
+        <div id="envelope-container" class="envelope-wrapper my-6">
+            <div id="envelope" class="envelope">
+                <div class="flap"></div>
+                <div class="pocket"></div>
+                <div class="wax-seal">
+                    <span class="text-2xl">🌷</span>
+                </div>
+                <div class="letter-preview flex flex-col justify-center items-center">
+                    <span class="text-xs font-semibold text-rose-500 uppercase tracking-widest">De parte de Abner</span>
+                    <p class="font-cursive text-rose-600 text-xl md:text-2xl font-bold my-1">Para: Sofía Cristina</p>
+                    <p class="text-[11px] text-amber-600 font-medium">Toca para desplegar la carta completa ✨</p>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-rose-400 text-xs tracking-widest uppercase mt-2 mb-10 animate-pulse font-semibold">
+            👇 Haz clic sobre el sobre para abrir tu carta de amor 👇
+        </p>
+
+        <!-- Modal de Carta Completa -->
+        <div id="letter-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-500">
+            <div class="bg-[#fffdf9] border-2 border-rose-200 w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl overflow-y-auto p-6 md:p-10 relative transform scale-95 transition-all duration-500" id="letter-content">
+                
+                <!-- Botón Cerrar -->
+                <button id="close-letter" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200 transition flex items-center justify-center shadow">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+
+                <!-- Encabezado Modal -->
+                <div class="text-center border-b border-rose-100 pb-6 mb-6">
+                    <div class="flex justify-center items-center gap-2 text-3xl mb-1">
+                        <span>🌷</span>
+                        <i class="fa-solid fa-heart text-rose-500"></i>
+                        <span>🌷</span>
+                    </div>
+                    <h2 class="font-romantic text-4xl md:text-6xl text-rose-600">Para Sofía Cristina</h2>
+                    <p class="text-xs text-amber-600 font-semibold tracking-wider uppercase mt-1">Vázquez Megía</p>
+                    <p class="text-xs text-rose-400 font-bold mt-1">Con todo el amor de Abner ❤️</p>
+                </div>
+
+                <!-- Cuerpo Carta Personalizada -->
+                <div class="space-y-4 text-gray-700 leading-relaxed font-light text-base md:text-lg">
+                    <p class="first-letter:text-5xl first-letter:font-cursive first-letter:text-rose-600 first-letter:font-bold first-letter:mr-1">
+                        Mi querida Sofía Cristina, te escribo estas palabras desde lo más profundo de mi corazón para recordarte lo infinitamente importante y especial que eres para mí.
+                    </p>
+                    <p>
+                        Desde que llegaste a mi vida, cada día tiene un brillo diferente. Tu sonrisa bella, tu mirada dulce y la ternura de tu forma de ser llenan mis días de una felicidad absoluta. Me siento el hombre más afortunado del mundo por tenerte a mi lado.
+                    </p>
+                    <p>
+                        Justo como dice la canción de Camilo: he visitado muchos lugares y conocido a muchas personas, pero **tú siempre serás mi lugar favorito**. Estar contigo es sentir paz, alegría y un amor incondicional que no cambiaría por nada.
+                    </p>
+                    <p>
+                        Te prometo cuidar de ti, hacerte sonreír todos los días, regalarte muchos tulipanes y estar a tu lado en cada paso. Eres mi presente y mi futuro soñado.
+                    </p>
+                    <p class="font-semibold text-rose-700 pt-2 text-center text-xl font-cursive">
+                        "De todos los lugares del mundo, mi rincón preferido siempre es estar a tu lado."
+                    </p>
+                </div>
+
+                <!-- Firma de Abner -->
+                <div class="mt-8 pt-6 border-t border-rose-100 flex flex-col items-end">
+                    <p class="font-cursive text-2xl md:text-3xl text-rose-600">Con todo mi amor eterno,</p>
+                    <p class="font-bold text-gray-800 text-lg mt-1">Abner ❤️</p>
+                </div>
+
+                <!-- Acciones Modal -->
+                <div class="mt-8 flex flex-wrap justify-center gap-4">
+                    <button id="rain-tulips-btn" class="bg-gradient-to-r from-amber-400 to-rose-500 hover:from-amber-500 hover:to-rose-600 text-white font-medium px-6 py-3 rounded-full shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2 text-sm">
+                        <span>🌷</span> ¡Lluvia de Tulipanes de Abner!
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- NUEVO ELEMENTO: Jardín Virtual de Tulipanes -->
+        <section class="w-full max-w-4xl my-12 bg-white/80 backdrop-blur-md p-6 md:p-8 rounded-3xl border border-rose-200 shadow-xl text-center">
+            <div class="inline-block bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-2">
+                🌷 Tu Jardín Virtual
+            </div>
+            <h3 class="font-romantic text-4xl md:text-5xl text-rose-600 mb-2">Planta Tulipanes para Sofía</h3>
+            <p class="text-gray-600 text-xs md:text-sm mb-6">Haz clic en la tierra de abajo para que Abner te plante un tulipán especial con un mensaje bonito de amor.</p>
+
+            <div id="tulip-garden" class="w-full h-64 bg-gradient-to-b from-amber-50/50 via-rose-50/30 to-amber-900/20 rounded-2xl border-2 border-dashed border-rose-200 relative overflow-hidden cursor-pointer flex items-end justify-center p-4">
+                <p id="garden-placeholder" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-gray-400 font-cursive text-xl pointer-events-none text-center">
+                    ✨ Toca aquí para sembrar tulipanes de amor ✨
+                </p>
+            </div>
+            <div class="mt-4 flex justify-between items-center text-xs text-gray-500 px-2">
+                <span id="tulip-count">Tulipanes sembrados: 0</span>
+                <button id="clear-garden" class="text-rose-500 hover:underline text-xs">Limpiar Jardín</button>
+            </div>
+        </section>
+
+        <!-- NUEVO ELEMENTO: Minijuego de San Valentín -->
+        <section id="game-section" class="w-full max-w-3xl my-12 bg-gradient-to-br from-rose-500 to-pink-600 text-white p-6 md:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div class="text-center mb-4 relative z-10">
+                <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Minijuego de Amor</span>
+                <h3 class="font-romantic text-4xl md:text-5xl mt-2">Atrapa los Tulipanes y Corazones</h3>
+                <p class="text-xs md:text-sm text-rose-100 mt-1">Conviene conseguir 10 puntos para desbloquear la promesa secreta de Abner.</p>
+            </div>
+
+            <!-- Panel de Puntuación -->
+            <div class="flex justify-between items-center bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl mb-4 relative z-10 border border-white/20">
+                <div class="font-bold text-sm">Puntos: <span id="game-score" class="text-amber-300 text-xl">0</span> / 10</div>
+                <button id="start-game-btn" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold px-4 py-2 rounded-full shadow text-xs transition">
+                    <i class="fa-solid fa-play"></i> Iniciar Juego
+                </button>
+            </div>
+
+            <!-- Área del Juego -->
+            <div id="game-container" class="w-full h-72 bg-black/20 rounded-2xl relative overflow-hidden border border-white/10 flex items-center justify-center">
+                <p id="game-instructions" class="text-rose-100 font-medium text-sm text-center px-4">
+                    Presiona "Iniciar Juego" y toca rápido todos los tulipanes 🌷 y corazones ❤️ que caigan antes de que lleguen abajo.
+                </p>
+            </div>
+        </section>
+
+        <!-- Sección de Música "Favorito - Camilo" -->
+        <section id="music-section" class="w-full max-w-3xl my-12 bg-gradient-to-br from-amber-50/80 via-white to-rose-50/80 backdrop-blur-md p-6 md:p-8 rounded-3xl border border-rose-200/80 shadow-xl">
+            <div class="text-center mb-6">
+                <span class="bg-rose-100 text-rose-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Nuestra Canción</span>
+                <h3 class="font-romantic text-4xl md:text-5xl text-rose-600 mt-2">"Favorito" - Camilo</h3>
+                <p class="text-gray-500 text-xs md:text-sm mt-1">Dedicada por Abner para Sofía Cristina 🎶</p>
+            </div>
+
+            <!-- Video Embed YouTube -->
+            <div class="relative w-full overflow-hidden rounded-2xl shadow-lg aspect-video mb-6 bg-black">
+                <iframe 
+                    class="w-full h-full"
+                    src="https://www.youtube-nocookie.com/embed/2mY7AFTtYwQ?autoplay=0&rel=0" 
+                    title="Camilo - Favorito" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <!-- Letra Destacada -->
+            <div class="bg-white/90 border border-rose-100 rounded-2xl p-6 text-center shadow-sm">
+                <div class="text-rose-400 text-xl mb-2"><i class="fa-solid fa-quote-left"></i></div>
+                <p class="font-cursive text-2xl md:text-3xl text-rose-700 leading-snug">
+                    "Que yo he viajado a lado y lado,<br>
+                    pero entre todos los lugares que he visitado,<br>
+                    <span class="font-bold underline decoration-amber-300">tú eres mi favorito.</span>"
+                </p>
+                <p class="text-xs text-amber-600 font-semibold mt-3 uppercase tracking-widest">— De parte de Abner con todo su amor —</p>
+            </div>
+        </section>
+
+        <!-- Galería de Razones y Promesas con Tarjetas Giratorias -->
+        <section id="reasons-section" class="w-full max-w-4xl my-12">
+            <div class="text-center mb-10">
+                <div class="flex justify-center items-center gap-2 mb-2">
+                    <span class="text-2xl">🌷</span>
+                    <span class="text-xs uppercase tracking-widest text-rose-500 font-bold">Promesas y Recuerdos</span>
+                    <span class="text-2xl">🌷</span>
+                </div>
+                <h3 class="font-romantic text-4xl md:text-6xl text-rose-700">Lo Que Abner Ama de Sofía</h3>
+                <p class="text-gray-500 text-sm mt-1">Toca cada tarjeta para descubrir el mensaje secreto</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-2">
+                
+                <!-- Tarjeta 1 -->
+                <div class="flip-card h-52 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front bg-white p-6 flex flex-col justify-center items-center border border-rose-100">
+                            <span class="text-4xl mb-2">🌷</span>
+                            <h4 class="font-bold text-gray-800 text-lg">Tu Dulce Sonrisa</h4>
+                            <p class="text-xs text-rose-400 mt-2 font-medium">Toca para descubrir</p>
+                        </div>
+                        <div class="flip-card-back bg-gradient-to-br from-rose-500 to-pink-500 text-white p-6 flex flex-col justify-center items-center">
+                            <p class="text-sm font-light italic">"Porque cuando sonríes, iluminas todo mi mundo de inmediato. — Abner"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 2 -->
+                <div class="flip-card h-52 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front bg-white p-6 flex flex-col justify-center items-center border border-rose-100">
+                            <span class="text-4xl mb-2">🐶</span>
+                            <h4 class="font-bold text-gray-800 text-lg">Tu Ternura</h4>
+                            <p class="text-xs text-rose-400 mt-2 font-medium">Toca para descubrir</p>
+                        </div>
+                        <div class="flip-card-back bg-gradient-to-br from-amber-500 to-rose-500 text-white p-6 flex flex-col justify-center items-center">
+                            <p class="text-sm font-light italic">"La forma tan cariñosa en la que me tratas hace que vuelva a enamorarme cada día."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 3 -->
+                <div class="flip-card h-52 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front bg-white p-6 flex flex-col justify-center items-center border border-rose-100">
+                            <span class="text-4xl mb-2">✨</span>
+                            <h4 class="font-bold text-gray-800 text-lg">Tu Gran Corazón</h4>
+                            <p class="text-xs text-rose-400 mt-2 font-medium">Toca para descubrir</p>
+                        </div>
+                        <div class="flip-card-back bg-gradient-to-br from-rose-500 to-pink-500 text-white p-6 flex flex-col justify-center items-center">
+                            <p class="text-sm font-light italic">"Eres una mujer increíble, noble y con un corazón puro que admiro profundamente."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 4 -->
+                <div class="flip-card h-52 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front bg-white p-6 flex flex-col justify-center items-center border border-rose-100">
+                            <span class="text-4xl mb-2">🎶</span>
+                            <h4 class="font-bold text-gray-800 text-lg">Nuestra Complicidad</h4>
+                            <p class="text-xs text-rose-400 mt-2 font-medium">Toca para descubrir</p>
+                        </div>
+                        <div class="flip-card-back bg-gradient-to-br from-amber-500 to-rose-500 text-white p-6 flex flex-col justify-center items-center">
+                            <p class="text-sm font-light italic">"Escuchar 'Favorito' y saber que estamos hechos el uno para el otro."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 5 -->
+                <div class="flip-card h-52 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front bg-white p-6 flex flex-col justify-center items-center border border-rose-100">
+                            <span class="text-4xl mb-2">💛</span>
+                            <h4 class="font-bold text-gray-800 text-lg">Nuestros Abrazos</h4>
+                            <p class="text-xs text-rose-400 mt-2 font-medium">Toca para descubrir</p>
+                        </div>
+                        <div class="flip-card-back bg-gradient-to-br from-rose-500 to-pink-500 text-white p-6 flex flex-col justify-center items-center">
+                            <p class="text-sm font-light italic">"Estar abrazado a ti es mi lugar de paz en este mundo."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta 6 -->
+                <div class="flip-card h-52 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front bg-white p-6 flex flex-col justify-center items-center border border-rose-100">
+                            <span class="text-4xl mb-2">👑</span>
+                            <h4 class="font-bold text-gray-800 text-lg">Por Siempre Juntos</h4>
+                            <p class="text-xs text-rose-400 mt-2 font-medium">Toca para descubrir</p>
+                        </div>
+                        <div class="flip-card-back bg-gradient-to-br from-amber-500 to-rose-500 text-white p-6 flex flex-col justify-center items-center">
+                            <p class="text-sm font-light italic">"Te amo hoy, mañana y siempre: Sofía Cristina Vázquez Megía."</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Generador Infinito de Razones -->
+        <section class="w-full max-w-xl my-12 bg-white/80 backdrop-blur-md p-8 rounded-3xl border border-rose-200 shadow-xl text-center">
+            <div class="flex justify-center gap-1 text-2xl mb-2">
+                <span>🌷</span><span>🐶</span><span>❤️</span>
+            </div>
+            <h4 class="font-romantic text-4xl text-rose-600 mb-1">Generador Infinito de Amor</h4>
+            <p class="text-xs text-gray-500 mb-6">Razones ilimitadas por las que Abner te ama</p>
+            
+            <div id="random-message-box" class="bg-rose-50/80 border border-rose-200 rounded-2xl p-5 min-h-[90px] flex items-center justify-center mb-6 shadow-inner transition-all duration-300">
+                <p id="random-message" class="font-cursive text-xl text-rose-700 italic">
+                    "Presiona el botón de abajo para que Abner te dedique una razón bonita..."
+                </p>
+            </div>
+
+            <button id="generate-msg-btn" class="bg-gradient-to-r from-amber-400 via-rose-500 to-pink-500 hover:opacity-95 text-white font-medium px-6 py-3 rounded-full shadow-lg transition flex items-center justify-center gap-2 mx-auto text-sm">
+                <i class="fa-solid fa-sparkles"></i> Otra razón para amarte, Sofía
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Pie de Página -->
+    <footer class="w-full py-6 text-center text-xs text-gray-500 border-t border-rose-100 bg-white/50 backdrop-blur-sm z-20">
+        <p class="font-bold text-gray-700">Diseñado con amor infinito por **Abner** para **Sofía Cristina Vázquez Megía** ❤️</p>
+        <p class="text-amber-600 text-[11px] mt-1">Tulipanes, Snoopy y nuestra canción favorita 🌷🎶</p>
+    </footer>
+
+    <!-- Modal de Sorpresa del Juego -->
+    <div id="game-reward-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-500">
+        <div class="bg-white rounded-3xl p-8 max-w-md text-center shadow-2xl border-2 border-rose-300 relative">
+            <span class="text-5xl">🏆🌷</span>
+            <h3 class="font-romantic text-4xl text-rose-600 mt-2">¡Felicidades, mi Sofía!</h3>
+            <p class="text-sm text-gray-600 mt-2 mb-4">Has atrapado todos los puntos. Has desbloqueado una promesa especial de parte de Abner:</p>
+            <div class="bg-rose-50 p-4 rounded-2xl border border-rose-200 mb-6">
+                <p class="font-cursive text-xl text-rose-700 font-bold">
+                    "Me comprometo a regalarte tulipanes reales, hacerte reír siempre y nunca dejar de recordar lo increíble que eres."
+                </p>
+                <p class="text-xs text-amber-600 font-semibold mt-2">— Con todo el amor de Abner ❤️</p>
+            </div>
+            <button id="close-reward-btn" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-6 py-2 rounded-full shadow text-sm">
+                Aceptar con un Beso 😘
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. CANVAS DE PARTÍCULAS (TULIPANES Y CORAZONES) ---
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        class TulipParticle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -30;
+                this.size = Math.random() * 14 + 10;
+                this.speedY = Math.random() * 1.2 + 0.6;
+                this.speedX = Math.random() * 0.8 - 0.4;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 1.5;
+                this.opacity = Math.random() * 0.7 + 0.3;
+                const rand = Math.random();
+                if (rand < 0.4) {
+                    this.type = 'tulip-yellow';
+                    this.color = `rgba(251, 191, 36, ${this.opacity})`;
+                } else if (rand < 0.7) {
+                    this.type = 'tulip-pink';
+                    this.color = `rgba(244, 63, 94, ${this.opacity})`;
+                } else {
+                    this.type = 'heart';
+                    this.color = `rgba(225, 29, 72, ${this.opacity})`;
+                }
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += Math.sin(this.y * 0.015) + this.speedX;
+                this.rotation += this.rotationSpeed;
+                if (this.y > canvas.height + 30) this.reset();
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+
+                if (this.type === 'heart') {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    const topCurve = this.size * 0.3;
+                    ctx.moveTo(0, topCurve);
+                    ctx.bezierCurveTo(0, 0, -this.size / 2, 0, -this.size / 2, topCurve);
+                    ctx.bezierCurveTo(-this.size / 2, (this.size + topCurve) / 2, 0, this.size, 0, this.size);
+                    ctx.bezierCurveTo(0, this.size, this.size / 2, (this.size + topCurve) / 2, this.size / 2, topCurve);
+                    ctx.bezierCurveTo(this.size / 2, 0, 0, 0, 0, topCurve);
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.size / 2);
+                    ctx.bezierCurveTo(-this.size / 2, -this.size / 2, -this.size / 2, this.size / 3, 0, this.size / 2);
+                    ctx.bezierCurveTo(this.size / 2, this.size / 3, this.size / 2, -this.size / 2, 0, -this.size / 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        const particles = Array.from({ length: 35 }, () => new TulipParticle());
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+
+        // --- 2. CONTROL DEL SOBRE Y MODAL CARTA ---
+        const envelope = document.getElementById('envelope');
+        const letterModal = document.getElementById('letter-modal');
+        const letterContent = document.getElementById('letter-content');
+        const closeLetterBtn = document.getElementById('close-letter');
+
+        function openEnvelope() {
+            if (!envelope.classList.contains('open')) {
+                envelope.classList.add('open');
+                confetti({
+                    particleCount: 60,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#fbbf24', '#f43f5e', '#fb7185', '#ffffff']
+                });
+                setTimeout(() => {
+                    letterModal.classList.remove('opacity-0', 'pointer-events-none');
+                    letterContent.classList.remove('scale-95');
+                    letterContent.classList.add('scale-100');
+                }, 900);
+            } else {
+                letterModal.classList.remove('opacity-0', 'pointer-events-none');
+                letterContent.classList.remove('scale-95');
+                letterContent.classList.add('scale-100');
+            }
+        }
+
+        function closeEnvelopeModal() {
+            letterModal.classList.add('opacity-0', 'pointer-events-none');
+            letterContent.classList.remove('scale-100');
+            letterContent.classList.add('scale-95');
+        }
+
+        envelope.addEventListener('click', openEnvelope);
+        closeLetterBtn.addEventListener('click', closeEnvelopeModal);
+        letterModal.addEventListener('click', (e) => { if (e.target === letterModal) closeEnvelopeModal(); });
+
+
+        // --- 3. BOTÓN DE LLUVIA DE TULIPANES ---
+        const rainTulipsBtn = document.getElementById('rain-tulips-btn');
+        rainTulipsBtn.addEventListener('click', () => {
+            const duration = 3 * 1000;
+            const end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#fbbf24', '#f43f5e', '#ffffff'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#fbbf24', '#f43f5e', '#ffffff'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        });
+
+
+        // --- 4. JARDÍN VIRTUAL DE TULIPANES ---
+        const tulipGarden = document.getElementById('tulip-garden');
+        const gardenPlaceholder = document.getElementById('garden-placeholder');
+        const tulipCountEl = document.getElementById('tulip-count');
+        const clearGardenBtn = document.getElementById('clear-garden');
+        let tulipCount = 0;
+
+        const tulipGardenNotes = [
+            "Te amo, Sofía", "Eres hermosa", "Para mi lugar favorito", 
+            "De parte de Abner", "Un tulipán amarillo para ti", "Mi niña linda", "Por siempre juntos"
+        ];
+
+        tulipGarden.addEventListener('click', (e) => {
+            if (gardenPlaceholder) gardenPlaceholder.style.display = 'none';
+
+            const rect = tulipGarden.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+
+            tulipCount++;
+            tulipCountEl.textContent = `Tulipanes sembrados: ${tulipCount}`;
+
+            const tulipElem = document.createElement('div');
+            tulipElem.className = 'absolute bottom-0 flex flex-col items-center transform -translate-x-1/2 transition-all duration-500 scale-0';
+            tulipElem.style.left = `${clickX}px`;
+
+            const colors = ['#f43f5e', '#fbbf24', '#ec4899', '#e11d48'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const noteText = tulipGardenNotes[Math.floor(Math.random() * tulipGardenNotes.length)];
+
+            tulipElem.innerHTML = `
+                <div class="bg-white/90 text-[10px] text-gray-700 px-2 py-0.5 rounded-full shadow border border-rose-200 mb-1 font-semibold whitespace-nowrap animate-bounce">
+                    ${noteText}
+                </div>
+                <div class="w-6 h-8 relative">
+                    <svg viewBox="0 0 40 50" class="w-full h-full">
+                        <path d="M20 15 C10 0, 12 -5, 20 5 C28 -5, 30 0, 20 15 Z" fill="${randomColor}" />
+                    </svg>
+                </div>
+                <div class="w-1.5 h-12 bg-green-500 rounded-full"></div>
+            `;
+
+            tulipGarden.appendChild(tulipElem);
+            setTimeout(() => { tulipElem.classList.remove('scale-0'); tulipElem.classList.add('scale-100'); }, 50);
+        });
+
+        clearGardenBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            tulipGarden.innerHTML = '';
+            tulipGarden.appendChild(gardenPlaceholder);
+            gardenPlaceholder.style.display = 'block';
+            tulipCount = 0;
+            tulipCountEl.textContent = `Tulipanes sembrados: 0`;
+        });
+
+
+        // --- 5. MINI JUEGO DE ATRAPAR TULIPANES ---
+        const gameContainer = document.getElementById('game-container');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const gameScoreEl = document.getElementById('game-score');
+        const gameInstructions = document.getElementById('game-instructions');
+        const rewardModal = document.getElementById('game-reward-modal');
+        const closeRewardBtn = document.getElementById('close-reward-btn');
+
+        let gameScore = 0;
+        let gameInterval = null;
+        let isPlaying = false;
+
+        function spawnGameItem() {
+            if (!isPlaying) return;
+            const item = document.createElement('div');
+            item.className = 'game-item text-3xl';
+            const items = ['🌷', '❤️', '💛', '🐶', '🌹'];
+            item.textContent = items[Math.floor(Math.random() * items.length)];
+            
+            const randomX = Math.random() * (gameContainer.clientWidth - 40);
+            item.style.left = `${randomX}px`;
+            const duration = Math.random() * 2 + 2; // 2 a 4s
+            item.style.animationDuration = `${duration}s`;
+
+            item.addEventListener('pointerdown', () => {
+                if (!isPlaying) return;
+                gameScore++;
+                gameScoreEl.textContent = gameScore;
+                item.remove();
+
+                if (gameScore >= 10) {
+                    endGame(true);
+                }
+            });
+
+            gameContainer.appendChild(item);
+            setTimeout(() => { if (item.parentNode) item.remove(); }, duration * 1000);
+        }
+
+        function startGame() {
+            gameScore = 0;
+            gameScoreEl.textContent = gameScore;
+            isPlaying = true;
+            gameInstructions.style.display = 'none';
+            startGameBtn.disabled = true;
+            startGameBtn.classList.add('opacity-50');
+
+            gameInterval = setInterval(spawnGameItem, 600);
+        }
+
+        function endGame(won) {
+            isPlaying = false;
+            clearInterval(gameInterval);
+            startGameBtn.disabled = false;
+            startGameBtn.classList.remove('opacity-50');
+
+            if (won) {
+                confetti({ particleCount: 80, spread: 100, origin: { y: 0.5 } });
+                rewardModal.classList.remove('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        startGameBtn.addEventListener('click', startGame);
+        closeRewardBtn.addEventListener('click', () => {
+            rewardModal.classList.add('opacity-0', 'pointer-events-none');
+            gameInstructions.style.display = 'block';
+            gameInstructions.textContent = '¡Felicidades por ganar! Puedes jugar de nuevo cuando quieras ❤️';
+        });
+
+
+        // --- 6. GENERADOR DE RAZONES INFINITAS ---
+        const sofiaMessages = [
+            "Sofía Cristina, eres el regalo más hermoso que la vida le ha dado a Abner.",
+            "De todos los lugares del mundo, estar contigo siempre será el favorito de Abner.",
+            "Tus abrazos son el refugio perfecto donde Abner encuentra paz.",
+            "Gracias por llenar la vida de Abner de tulipanes, risas y ternura.",
+            "Abner te ama más allá de lo que las palabras pueden expresar.",
+            "Eres el pensamiento favorito de Abner al despertar y al dormir.",
+            "Snoopy y Abner coinciden: ¡Sofía Cristina es la niña más bella del universo!",
+            "Estar a tu lado hace que cada día parezca una canción bonita de Camilo.",
+            "Tu sonrisa bella es la mayor motivación de Abner.",
+            "Abner promete estar a tu lado en las buenas y en las malas por siempre."
+        ];
+
+        const randomMsgText = document.getElementById('random-message');
+        const generateMsgBtn = document.getElementById('generate-msg-btn');
+
+        generateMsgBtn.addEventListener('click', () => {
+            randomMsgText.style.opacity = '0';
+            setTimeout(() => {
+                const randomIndex = Math.floor(Math.random() * sofiaMessages.length);
+                randomMsgText.textContent = `"${sofiaMessages[randomIndex]}"`;
+                randomMsgText.style.opacity = '1';
+            }, 200);
+        });
+
+    </script>
+</body>
+</html>
